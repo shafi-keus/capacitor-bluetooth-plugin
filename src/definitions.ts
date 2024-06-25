@@ -8,20 +8,24 @@ interface OtaData {
   branch : string;
   token : string;
 }
-interface Data {
+interface SetMtu {
   deviceId : string;
-  value : number;
+  mtu : number;
+}
+interface SetPhy {
+  deviceId : string;
+  phy : number;
 }
 interface ReadCharacteristic {
   deviceId : string;
-  characterstic : string;
+  characteristic : string;
 }
 interface NotifyCharacteristic {
   deviceId : string;
-  characterstic : string;
+  characteristic : string;
 }
 interface WriteCharacteristic extends ReadCharacteristic {
-  value : Uint8Array
+  value : [number|string];
 }
 interface SendAdvertisement {
   advtData : any;
@@ -29,6 +33,10 @@ interface SendAdvertisement {
 
 interface option {
   deviceId : string;
+}
+interface Priority {
+  deviceId : string;
+  priority : number;
 }
 
 export interface BLEPlugin extends Plugin {
@@ -39,9 +47,10 @@ export interface BLEPlugin extends Plugin {
   isLocationEnabled():Promise<boolean>;
   requestLocationEnable():Promise<void>
   connect(option:option):Promise<void>;
-  disconnect(deviceId : string):Promise<void>;
-  setMtu(data : Data):Promise<void>;
-  setConnectionPriority(data : Data):Promise<void>;
+  disconnect(option:option):Promise<void>;
+  setMtu(data : SetMtu):Promise<void>;
+  setPhy(data : SetPhy):Promise<void>;
+  setConnectionPriority(data : Priority):Promise<void>;
   startScan(): Promise<void>;
   stopScan(): Promise<void>;
   getDevices(): Promise<void>;

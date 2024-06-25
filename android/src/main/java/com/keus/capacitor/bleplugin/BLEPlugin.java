@@ -57,6 +57,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
     @Override
     public void bleStopScan(JSONObject response) {
         LogUtil.d(Constants.Log,response.toString());
+        notifyListeners("pluginEvent", new JSObject().put("data",response));
     }
 
     @Override
@@ -125,7 +126,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
          JSONObject bleIntialiation = new JSONObject();
          try {
              bleIntialiation.put("Type", Constants.INITIALIZE_BLE_REQUEST);
-             bleIntialiation.put("Data",new Object[0]);
+             bleIntialiation.put("data",new Object[0]);
              communicator.sendMessageToBle(bleIntialiation);
              call.resolve();
          } catch (JSONException e) {
@@ -140,7 +141,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         JSONObject bleRequest = new JSONObject();
         try {
             bleRequest.put("Type", Constants.LISTDEVICE_REQUEST);
-            bleRequest.put("Data",new Object[0]);
+            bleRequest.put("data",new Object[0]);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
         } catch (JSONException e) {
@@ -155,7 +156,22 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         JSONObject bleRequest = new JSONObject();
         try {
             bleRequest.put("Type", Constants.STARTSCAN_REQUEST);
-            bleRequest.put("Data",new Object[0]);
+            bleRequest.put("data",new Object[0]);
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @PluginMethod
+    public void stopScan(PluginCall call) {
+        System.out.println("start scan method triggered at plugin");
+        JSONObject bleRequest = new JSONObject();
+        try {
+            bleRequest.put("Type", Constants.STOPSCAN_REQUEST);
+            bleRequest.put("data",new Object[0]);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
         } catch (JSONException e) {
@@ -175,8 +191,142 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         data.put("deviceId",call.getString("deviceId"));
         try {
             bleRequest.put("Type", Constants.CONNECT_REQUEST);
-            bleRequest.put("Data",  data);
+            bleRequest.put("data",  data);
             communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void disconnect(PluginCall call) {
+
+        System.out.println("disconnect method triggered at plugin"+call.getData().toString());
+        String receivedData = call.getString("deviceId");
+        System.out.print("received data : "+receivedData);
+        JSONObject bleRequest = new JSONObject();
+        JSObject data = new JSObject();
+        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.DISCONNECT_REQUEST);
+            bleRequest.put("data",  data);
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void readCharacteristic(PluginCall call){
+        System.out.println("read characterstic method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.READ_CHARACTERISTIC_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void setMtu(PluginCall call){
+        System.out.println("setmtu method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.SET_MTU_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void setPhy(PluginCall call){
+        System.out.println("setphy method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.SET_PHY_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void setConnectionPriority(PluginCall call){
+        System.out.println("connection priority method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+        try {
+            bleRequest.put("Type", Constants.SET_PRIORITY_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @PluginMethod
+    public void writeCharacteristic(PluginCall call){
+        System.out.println("write characterstic method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.WRITE_CHARACTERISTIC_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void notifyCharacteristic(PluginCall call){
+        System.out.println("notify characterstic method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.NOTIFY_CHARACTERISTIC_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void doOta(PluginCall call){
+        System.out.println("ota method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("Type", Constants.OTA_REQUEST);
+//            bleRequest.put("Data",  call.getData());
+            String deviceAddress = call.getString("deviceId");
+            String deviceCategory = call.getString("category");
+            String deviceType = call.getString("type");
+            String version = call.getString("version");
+            String branch = call.getString("branch");
+            String token = call.getString("token");
+            communicator.sendMessageToOta(deviceAddress,deviceType,deviceCategory,version,token,branch);
             call.resolve();
         } catch (JSONException e) {
             throw new RuntimeException(e);
@@ -226,8 +376,12 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
     }
 
 
+
+
     @Override
     public void otaProgress(JSONObject response) {
-
+        LogUtil.d(Constants.Log,response.toString());
+        System.out.println("*******************************************************ota is in progress");
+        notifyListeners("pluginEvent", new JSObject().put("data",response));
     }
 }
