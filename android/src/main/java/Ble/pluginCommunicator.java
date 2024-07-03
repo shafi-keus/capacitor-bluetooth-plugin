@@ -48,10 +48,10 @@ public class pluginCommunicator extends Thread {
 
         Communication bleMessage = new Communication();
         bleMessage.fromMessage = Constants.MessageFromBleUtil;
-        if(message.has("Type") && message.has("Data")){
+        if(message.has("type") && message.has("data")){
             LogUtil.e(Constants.Log,"Message Received in Plugin");
             try{
-                switch (message.getInt("Type")){
+                switch (message.getInt("type")){
                     // message for ble Initialization
                     case Constants.INITIALIZE_BLE_REQUEST:
                         bleMessage.messageType = Constants.INITIALIZE_BLE_REQUEST;
@@ -85,54 +85,66 @@ public class pluginCommunicator extends Thread {
                         break;
                     case Constants.CONNECT_REQUEST:
                         bleMessage.messageType = Constants.CONNECT_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId")};
                         bleMessage.messageSize = 1;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.DISCONNECT_REQUEST:
                         bleMessage.messageType = Constants.DISCONNECT_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId")};
                         bleMessage.messageSize = 1;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.WRITE_CHARACTERISTIC_REQUEST:
                         bleMessage.messageType = Constants.WRITE_CHARACTERISTIC_REQUEST;
-                        JSONArray valueArray = message.getJSONObject("Data").getJSONArray("value");
+                        JSONArray valueArray = message.getJSONObject("data").getJSONArray("value");
                         byte[] data = new byte[valueArray.length()];
                         for(int i=0;i<valueArray.length();i++){
                             data[i] = (byte)valueArray.getInt(i);
                         }
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),data,message.getJSONObject("Data").getString("characteristic")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),data,message.getJSONObject("data").getString("characteristic")};
                         bleMessage.messageSize = 3;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.READ_CHARACTERISTIC_REQUEST:
                         bleMessage.messageType = Constants.READ_CHARACTERISTIC_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),message.getJSONObject("Data").getString("characteristic")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),message.getJSONObject("data").getString("characteristic")};
                         bleMessage.messageSize = 2;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.NOTIFY_CHARACTERISTIC_REQUEST:
                         bleMessage.messageType = Constants.NOTIFY_CHARACTERISTIC_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),message.getJSONObject("Data").getString("characteristic")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),message.getJSONObject("data").getString("characteristic")};
                         bleMessage.messageSize = 2;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.SET_MTU_REQUEST:
                         bleMessage.messageType = Constants.SET_MTU_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),message.getJSONObject("Data").getInt("mtu")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),message.getJSONObject("data").getInt("mtu")};
                         bleMessage.messageSize = 2;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.SET_PRIORITY_REQUEST:
                         bleMessage.messageType = Constants.SET_PRIORITY_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),message.getJSONObject("Data").getInt("priority")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),message.getJSONObject("data").getInt("priority")};
                         bleMessage.messageSize = 2;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
                     case Constants.SET_PHY_REQUEST:
                         bleMessage.messageType = Constants.SET_PHY_REQUEST;
-                        bleMessage.data = new Object[]{message.getJSONObject("Data").getString("deviceId"),message.getJSONObject("Data").getInt("phy")};
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId"),message.getJSONObject("data").getInt("phy")};
+                        bleMessage.messageSize = 2;
+                        Common.bleUtil_Queue.put(bleMessage);
+                        break;
+                    case Constants.DISCOVER_SERVICE_REQUEST:
+                        bleMessage.messageType = Constants.DISCOVER_SERVICE_REQUEST;
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getString("deviceId")};
+                        bleMessage.messageSize = 1;
+                        Common.bleUtil_Queue.put(bleMessage);
+                        break;
+                    case Constants.ADVERTISE_REQUEST:
+                        bleMessage.messageType = Constants.ADVERTISE_REQUEST;
+                        bleMessage.data = new Object[]{message.getJSONObject("data").getJSONArray("data"),(Integer)message.getJSONObject("data").getInt("time")};
                         bleMessage.messageSize = 2;
                         Common.bleUtil_Queue.put(bleMessage);
                         break;
@@ -190,8 +202,10 @@ public class pluginCommunicator extends Thread {
     void sendInitializationResponse(){
         try{
             JSONObject response = new JSONObject();
-            response.put("Type",Constants.INITIALIZE_BLE_RESPONSE);
-            response.put("Data",true);
+            JSONObject Data = new JSONObject();
+            response.put("type",Constants.INITIALIZE_BLE_RESPONSE);
+            Data.put("success",true);
+            response.put("data",Data);
             pluginInterface.bleInitialization(response);
         }
         catch (Exception e){
@@ -201,9 +215,11 @@ public class pluginCommunicator extends Thread {
     }
     void sendDeInitializationResponse(){
         JSONObject response = new JSONObject();
+        JSONObject Data = new JSONObject();
         try{
-            response.put("Type",Constants.DEINITIALIZE_BLE_RESPONSE);
-            response.put("Data",true);
+            response.put("type",Constants.DEINITIALIZE_BLE_RESPONSE);
+            Data.put("success",true);
+            response.put("data",Data);
             pluginInterface.bleDeInitialization(response);
         }
         catch (Exception e){
@@ -213,8 +229,8 @@ public class pluginCommunicator extends Thread {
     void sendStartScanResponse(){
         JSONObject response = new JSONObject();
         try{
-            response.put("Type",Constants.STARTSCAN_RESPONSE);
-            response.put("Data",true);
+            response.put("type",Constants.STARTSCAN_RESPONSE);
+            response.put("data",true);
             pluginInterface.bleStartScan(response);
         }
         catch (Exception e){
@@ -224,8 +240,8 @@ public class pluginCommunicator extends Thread {
     void sendStartScanResponse(int error){
         JSONObject response = new JSONObject();
         try{
-            response.put("Type",Constants.STARTSCAN_RESPONSE);
-            response.put("Data",error);
+            response.put("type",Constants.STARTSCAN_RESPONSE);
+            response.put("data",error);
             pluginInterface.bleStartScan(response);
         }
         catch (Exception e){
@@ -235,8 +251,8 @@ public class pluginCommunicator extends Thread {
     void sendStopScanResponse(){
         JSONObject response = new JSONObject();
         try{
-            response.put("Type",Constants.STOPSCAN_RESPONSE);
-            response.put("Data",true);
+            response.put("type",Constants.STOPSCAN_RESPONSE);
+            response.put("data",true);
             pluginInterface.bleStopScan(response);
         }
         catch (Exception e){
@@ -246,8 +262,8 @@ public class pluginCommunicator extends Thread {
     void sendStopScanResponse(int error){
         JSONObject response = new JSONObject();
         try{
-            response.put("Type",Constants.STOPSCAN_RESPONSE);
-            response.put("Data",error);
+            response.put("type",Constants.STOPSCAN_RESPONSE);
+            response.put("data",error);
             pluginInterface.bleStopScan(response);
         }
         catch (Exception e){
@@ -259,28 +275,30 @@ public class pluginCommunicator extends Thread {
         try{
             if(devicesList == null){
                 JSONObject response = new JSONObject();
-                response.put("Type",Constants.LISTDEVICE_RESPONSE);
+                response.put("type",Constants.LISTDEVICE_RESPONSE);
                 JSONObject devices = new JSONObject();
-                devices.put("Devices",null);
-                response.put("Data",devices);
+                devices.put("devices",null);
+                response.put("data",devices);
                 pluginInterface.blegetDevices(response);
             }
             else{
                 JSONObject response = new JSONObject();
-                response.put("Type",Constants.LISTDEVICE_RESPONSE);
+                response.put("type",Constants.LISTDEVICE_RESPONSE);
                 JSONObject deviceData = new JSONObject();
                 JSONArray devices = new JSONArray();
                 for(String key: devicesList.keySet()){
                     ScanningDevices device = devicesList.get(key);
                     JSONObject deviceProperties = new JSONObject();
-                    deviceProperties.put("NAME",device.deviceName);
-                    deviceProperties.put("ADDRESS",key);
-                    deviceProperties.put("RSSI",device.rssi);
-                    deviceProperties.put("IS_CONNECTED",device.isConnected());
+                    deviceProperties.put("name",device.deviceName);
+                    deviceProperties.put("address",key);
+                    deviceProperties.put("rssi",device.rssi);
+                    deviceProperties.put("isConnected",device.isConnected);
+                    if(device.getManufactureData()!=null)
+                        deviceProperties.put("manufacturingData",new JSONArray(device.getManufactureData()));
                     devices.put(deviceProperties);
                 }
-                deviceData.put("Devices",devices);
-                response.put("Data",deviceData);
+                deviceData.put("devices",devices);
+                response.put("data",deviceData);
                 pluginInterface.blegetDevices(response);
             }
         }
@@ -292,10 +310,10 @@ public class pluginCommunicator extends Thread {
          JSONObject response = new JSONObject();
          JSONObject data = new JSONObject();
          try{
-             response.put("Type",Constants.CONNECT_RESPONSE);
+             response.put("type",Constants.CONNECT_RESPONSE);
              data.put("success",true);
              data.put("deviceId",bleAddress);
-             response.put("Data",data);
+             response.put("data",data);
              pluginInterface.bleConnectDevice(response);
          }
          catch(Exception e){
@@ -306,11 +324,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.CONNECT_RESPONSE);
+            response.put("type",Constants.CONNECT_RESPONSE);
             data.put("success",false);
             data.put("deviceId",bleAddress);
             data.put("reason",error);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleConnectDevice(response);
         }
         catch(Exception e){
@@ -321,10 +339,10 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.DISCONNECT_RESPONSE);
+            response.put("type",Constants.DISCONNECT_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleDisconnectDevice(response);
         }
         catch(Exception e){
@@ -335,11 +353,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.WRITE_CHARACTERISTIC_RESPONSE);
+            response.put("type",Constants.WRITE_CHARACTERISTIC_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
             data.put("characteristic",characteristic);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleWriteCharacteristic(response);
         }
         catch(Exception e){
@@ -354,12 +372,12 @@ public class pluginCommunicator extends Thread {
             array.put(arrayvalue);
         }
         try {
-            response.put("Type", Constants.READ_CHARACTERISTIC_RESPONSE);
+            response.put("type", Constants.READ_CHARACTERISTIC_RESPONSE);
             data.put("deviceId", bleAddress);
             data.put("success", true);
             data.put("characteristic", characteristic);
             data.put("value", array);
-            response.put("Data", data);
+            response.put("data", data);
             pluginInterface.bleReadCharacteristic(response);
         }
         catch (Exception e){
@@ -370,11 +388,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.NOTIFY_CHARACTERISTIC_RESPONSE);
+            response.put("type",Constants.NOTIFY_CHARACTERISTIC_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
             data.put("characteristic",characteristic);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleNotifyCharacteristic(response);
         }
         catch(Exception e){
@@ -385,11 +403,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_MTU_RESPONSE);
+            response.put("type",Constants.SET_MTU_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
             data.put("mtu",mtu);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.blesetMtu(response);
         }
         catch(Exception e){
@@ -400,11 +418,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_PRIORITY_RESPONSE);
+            response.put("type",Constants.SET_PRIORITY_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
-            data.put("Priority",priority);
-            response.put("Data",data);
+            data.put("priority",priority);
+            response.put("data",data);
             pluginInterface.blesetPriority(response);
         }
         catch(Exception e){
@@ -415,11 +433,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_PHY_RESPONSE);
+            response.put("type",Constants.SET_PHY_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",true);
             data.put("phy",phy);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.blesetPhy(response);
         }
         catch(Exception e){
@@ -430,11 +448,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.DISCONNECT_RESPONSE);
+            response.put("type",Constants.DISCONNECT_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("reason",Error);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleDisconnectDevice(response);
         }
         catch(Exception e){
@@ -445,12 +463,12 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.WRITE_CHARACTERISTIC_RESPONSE);
+            response.put("type",Constants.WRITE_CHARACTERISTIC_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("reason",Error);
             data.put("characteristic",characteristic);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleWriteCharacteristic(response);
         }
         catch(Exception e){
@@ -461,12 +479,12 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try {
-            response.put("Type", Constants.READ_CHARACTERISTIC_RESPONSE);
+            response.put("type", Constants.READ_CHARACTERISTIC_RESPONSE);
             data.put("deviceId", bleAddress);
             data.put("success", false);
             data.put("reason",Error);
             data.put("characteristic", characteristic);
-            response.put("Data", data);
+            response.put("data", data);
             pluginInterface.bleReadCharacteristic(response);
         }
         catch (Exception e){
@@ -477,12 +495,12 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.NOTIFY_CHARACTERISTIC_RESPONSE);
+            response.put("type",Constants.NOTIFY_CHARACTERISTIC_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("reason",Error);
             data.put("characteristic",characteristic);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.bleNotifyCharacteristic(response);
         }
         catch(Exception e){
@@ -493,12 +511,12 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_MTU_RESPONSE);
+            response.put("type",Constants.SET_MTU_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("mtu",mtu);
             data.put("reason",Error);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.blesetMtu(response);
         }
         catch(Exception e){
@@ -509,12 +527,12 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_PRIORITY_RESPONSE);
+            response.put("type",Constants.SET_PRIORITY_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("reason",Error);
-            data.put("Priority",priority);
-            response.put("Data",data);
+            data.put("priority",priority);
+            response.put("data",data);
             pluginInterface.blesetPriority(response);
         }
         catch(Exception e){
@@ -525,11 +543,11 @@ public class pluginCommunicator extends Thread {
         JSONObject response = new JSONObject();
         JSONObject data = new JSONObject();
         try{
-            response.put("Type",Constants.SET_PHY_RESPONSE);
+            response.put("type",Constants.SET_PHY_RESPONSE);
             data.put("deviceId",bleAddress);
             data.put("success",false);
             data.put("phy",phy);
-            response.put("Data",data);
+            response.put("data",data);
             pluginInterface.blesetPhy(response);
         }
         catch(Exception e){
@@ -544,12 +562,12 @@ public class pluginCommunicator extends Thread {
             array.put(arrayvalue);
         }
         try {
-            response.put("Type", Constants.NOTIFY_CHARACTERISTIC_UPDATE_RESPONSE);
+            response.put("type", Constants.NOTIFY_CHARACTERISTIC_UPDATE_RESPONSE);
             data.put("deviceId", bleAddress);
             data.put("success", true);
             data.put("characteristic", characteristic);
             data.put("value", array);
-            response.put("Data", data);
+            response.put("data", data);
             pluginInterface.bleNotifyCharacteristicData(response);
         }
         catch (Exception e){
@@ -631,6 +649,7 @@ public class pluginCommunicator extends Thread {
             byte[] filecontent = getFilecontent(requestUrl,queryParams);
             if(filecontent != null){
                 binder.getService().doOtaFor(deviceAddress,filecontent);
+                binder.getService().setUpdatingVersion(version);
                 startForegroundService();
             }
             else{
@@ -641,6 +660,63 @@ public class pluginCommunicator extends Thread {
             sendMessagetoPluginCommunicator(Constants.OTA_RESPONSE,Constants.MessageFromOtaUtil,1,new Object[]{deviceAddress},Constants.BLE_ADDRESS_NOT_FOUND);
         }
     }
+
+    void sendServiceDiscoveryResponse(String deviceAddress){
+         try{
+             JSONObject response = new JSONObject();
+             JSONObject data = new JSONObject();
+             response.put("type",Constants.DISCOVER_SERVICE_RESPONSE);
+             data.put("success",true);
+             data.put("deviceId",deviceAddress);
+             response.put("data",data);
+             pluginInterface.bleServiceDiscoveryData(response);
+         }
+         catch(Exception e){
+             LogUtil.e(Constants.Error,"Error in sending Service Discovery Response"+e.getMessage());
+         }
+    }
+
+    void sendServiceDiscoveryResponse(String deviceAddress , int error){
+         try{
+            JSONObject response = new JSONObject();
+            JSONObject data = new JSONObject();
+            response.put("type",Constants.DISCOVER_SERVICE_RESPONSE);
+            data.put("success",false);
+            data.put("deviceId",deviceAddress);
+            response.put("data",data);
+            pluginInterface.bleServiceDiscoveryData(response);
+         }
+         catch(Exception e){
+             LogUtil.e(Constants.Error,"Error in sending Service Discovery Response"+e.getMessage());
+         }
+    }
+
+    void sendAdvertiseResponse(){
+         try{
+             JSONObject response = new JSONObject();
+             response.put("type",Constants.ADVERTISE_RESPONSE);
+             JSONObject data = new JSONObject();
+             data.put("success",true);
+             response.put("data",data);
+             pluginInterface.bleAdvertiseData(response);
+         }catch (Exception e){
+             LogUtil.e(Constants.Error,"Error in sending Advertise Response"+e.getMessage());
+         }
+    }
+    void sendAdvertiseResponse(int error){
+        try{
+            JSONObject response = new JSONObject();
+            response.put("type",Constants.ADVERTISE_RESPONSE);
+            JSONObject data = new JSONObject();
+            data.put("success",false);
+            data.put("reason",error);
+            response.put("data",data);
+            pluginInterface.bleAdvertiseData(response);
+        }catch (Exception e){
+            LogUtil.e(Constants.Error,"Error in sending Advertise Response"+e.getMessage());
+            }
+    }
+
     @Override
     public void run() {
         LogUtil.e(Constants.Log,"plugin Communicator Thread Started");
@@ -726,6 +802,18 @@ public class pluginCommunicator extends Thread {
                         else
                             setSetPhyResponse((String)message.data[0],(int)message.data[1],message.Error);
                         break;
+                    case Constants.DISCOVER_SERVICE_RESPONSE:
+                        if(message.Error == 0)
+                            sendServiceDiscoveryResponse((String)message.data[0]);
+                        else
+                            sendServiceDiscoveryResponse((String)message.data[0],message.Error);
+                        break;
+                    case Constants.ADVERTISE_RESPONSE:
+                        if(message.Error == 0)
+                            sendAdvertiseResponse();
+                        else
+                            sendAdvertiseResponse(message.Error);
+
                 }
             } catch (Exception e) {
                 LogUtil.e(Constants.Error,"Error in plugin Communicator thread"+e.getMessage());

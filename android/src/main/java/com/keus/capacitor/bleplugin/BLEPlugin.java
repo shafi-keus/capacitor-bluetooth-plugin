@@ -120,12 +120,24 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         notifyListeners("pluginEvent", new JSObject().put("data",response));
     }
 
+    @Override
+    public void bleServiceDiscoveryData(JSONObject response) {
+        LogUtil.d(Constants.Log,response.toString());
+        notifyListeners("pluginEvent", new JSObject().put("data",response));
+    }
+
+    @Override
+    public void bleAdvertiseData(JSONObject response) {
+        LogUtil.d(Constants.Log,response.toString());
+        notifyListeners("pluginEvent", new JSObject().put("data",response));
+    }
+
     @PluginMethod
      public void initializeBle(PluginCall call) {
         System.out.println("called ble initilization method at plugin");
          JSONObject bleIntialiation = new JSONObject();
          try {
-             bleIntialiation.put("Type", Constants.INITIALIZE_BLE_REQUEST);
+             bleIntialiation.put("type", Constants.INITIALIZE_BLE_REQUEST);
              bleIntialiation.put("data",new Object[0]);
              communicator.sendMessageToBle(bleIntialiation);
              call.resolve();
@@ -140,7 +152,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         System.out.println("fetching devices method triggered at plugin");
         JSONObject bleRequest = new JSONObject();
         try {
-            bleRequest.put("Type", Constants.LISTDEVICE_REQUEST);
+            bleRequest.put("type", Constants.LISTDEVICE_REQUEST);
             bleRequest.put("data",new Object[0]);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -155,8 +167,23 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         System.out.println("start scan method triggered at plugin");
         JSONObject bleRequest = new JSONObject();
         try {
-            bleRequest.put("Type", Constants.STARTSCAN_REQUEST);
+            bleRequest.put("type", Constants.STARTSCAN_REQUEST);
             bleRequest.put("data",new Object[0]);
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @PluginMethod
+    public void sendAdvertisement(PluginCall call) {
+        System.out.println("send advt method triggered at plugin");
+        JSONObject bleRequest = new JSONObject();
+        try {
+            bleRequest.put("type", Constants.ADVERTISE_REQUEST);
+            bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
         } catch (JSONException e) {
@@ -170,7 +197,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         System.out.println("start scan method triggered at plugin");
         JSONObject bleRequest = new JSONObject();
         try {
-            bleRequest.put("Type", Constants.STOPSCAN_REQUEST);
+            bleRequest.put("type", Constants.STOPSCAN_REQUEST);
             bleRequest.put("data",new Object[0]);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -190,7 +217,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         JSObject data = new JSObject();
         data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.CONNECT_REQUEST);
+            bleRequest.put("type", Constants.CONNECT_REQUEST);
             bleRequest.put("data",  data);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -209,7 +236,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         JSObject data = new JSObject();
         data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.DISCONNECT_REQUEST);
+            bleRequest.put("type", Constants.DISCONNECT_REQUEST);
             bleRequest.put("data",  data);
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -225,7 +252,23 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.READ_CHARACTERISTIC_REQUEST);
+            bleRequest.put("type", Constants.READ_CHARACTERISTIC_REQUEST);
+            bleRequest.put("data",  call.getData());
+            communicator.sendMessageToBle(bleRequest);
+            call.resolve();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PluginMethod
+    public void requestServiceDiscover(PluginCall call){
+        System.out.println("service discover method triggered at plugin"+call.getData());
+        JSONObject bleRequest = new JSONObject();
+//        JSObject data = new JSObject();
+//        data.put("deviceId",call.getString("deviceId"));
+        try {
+            bleRequest.put("type", Constants.DISCOVER_SERVICE_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -241,7 +284,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.SET_MTU_REQUEST);
+            bleRequest.put("type", Constants.SET_MTU_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -257,7 +300,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.SET_PHY_REQUEST);
+            bleRequest.put("type", Constants.SET_PHY_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -271,7 +314,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         System.out.println("connection priority method triggered at plugin"+call.getData());
         JSONObject bleRequest = new JSONObject();
         try {
-            bleRequest.put("Type", Constants.SET_PRIORITY_REQUEST);
+            bleRequest.put("type", Constants.SET_PRIORITY_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -286,7 +329,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.WRITE_CHARACTERISTIC_REQUEST);
+            bleRequest.put("type", Constants.WRITE_CHARACTERISTIC_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -295,6 +338,8 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
         }
     }
 
+
+
     @PluginMethod
     public void notifyCharacteristic(PluginCall call){
         System.out.println("notify characterstic method triggered at plugin"+call.getData());
@@ -302,7 +347,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.NOTIFY_CHARACTERISTIC_REQUEST);
+            bleRequest.put("type", Constants.NOTIFY_CHARACTERISTIC_REQUEST);
             bleRequest.put("data",  call.getData());
             communicator.sendMessageToBle(bleRequest);
             call.resolve();
@@ -318,7 +363,7 @@ public class BLEPlugin extends Plugin implements bleToPlugin, otaToPlugin {
 //        JSObject data = new JSObject();
 //        data.put("deviceId",call.getString("deviceId"));
         try {
-            bleRequest.put("Type", Constants.OTA_REQUEST);
+            bleRequest.put("type", Constants.OTA_REQUEST);
 //            bleRequest.put("Data",  call.getData());
             String deviceAddress = call.getString("deviceId");
             String deviceCategory = call.getString("category");

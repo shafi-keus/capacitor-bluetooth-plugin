@@ -19,7 +19,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-
 import com.keus.capacitor.bleplugin.R;
 
 import org.json.JSONException;
@@ -41,6 +40,16 @@ public class OtaForeground extends Service {
     public static final String CHANNEL_ID = "ota_progress_channel";
     byte []fileContent;
     String bleAddress;
+
+    public String getUpdatingVersion() {
+        return UpdatingVersion;
+    }
+
+    public void setUpdatingVersion(String updatingVersion) {
+        UpdatingVersion = updatingVersion;
+    }
+
+    String UpdatingVersion = "";
     int TotalBlocks;
     private final String IMAGE_IDENTIFY = "f000ffc1-0451-4000-b000-000000000000";
     private final String IMAGE_BLOCK = "f000ffc2-0451-4000-b000-000000000000";
@@ -90,7 +99,6 @@ public class OtaForeground extends Service {
     void acquireSemaphore(){
         try {
             semaphore.acquire();
-            LogUtil.e(Constants.Log,"Semaphore Acquired");
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -98,7 +106,6 @@ public class OtaForeground extends Service {
     void releaseSemaphore(){
         try{
             semaphore.release();
-            LogUtil.e(Constants.Log,"Semaphore Released");
         }
         catch (Exception e){
             throw new RuntimeException(e);
@@ -115,14 +122,14 @@ public class OtaForeground extends Service {
          RemoteViews remoteViews;
          // notification code
         remoteViews = new RemoteViews(getPackageName(),R.layout.notification);
-        remoteViews.setTextViewText(R.id.deviceName,"KZirb");
+        remoteViews.setTextViewText(R.id.deviceName,bleOperations.getDeviceName(bleAddress));
         remoteViews.setTextViewText(R.id.progress,"0%");
-        remoteViews.setTextViewText(R.id.updating,"3.52");
+        remoteViews.setTextViewText(R.id.updating,UpdatingVersion);
         remoteViews.setProgressBar(R.id.progressBar,100,0,false);
         remoteViews.setImageViewResource(R.id.Cancel_Icon,R.drawable.cancel_24px);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this,CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.keus_foreground)
                 .setCustomBigContentView(remoteViews)
                 .setAutoCancel(false)
                 .setOngoing(true)
@@ -249,10 +256,10 @@ public class OtaForeground extends Service {
                                                                     JSONObject jsonObject = new JSONObject();
                                                                     JSONObject data = new JSONObject();
                                                                     try {
-                                                                        jsonObject.put("Type",Constants.OTA_RESPONSE);
-                                                                        data.put("Progress",currentProgress);
+                                                                        jsonObject.put("type",Constants.OTA_RESPONSE);
+                                                                        data.put("progress",currentProgress);
                                                                         data.put("bleAddress",bleAddress);
-                                                                        jsonObject.put("Data",data);
+                                                                        jsonObject.put("data",data);
                                                                         otaToPlugin.otaProgress(jsonObject);
                                                                     } catch (JSONException e) {
                                                                         throw new RuntimeException(e);

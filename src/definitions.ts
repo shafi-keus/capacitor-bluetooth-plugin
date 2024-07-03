@@ -28,7 +28,8 @@ interface WriteCharacteristic extends ReadCharacteristic {
   value : [number|string];
 }
 interface SendAdvertisement {
-  advtData : any;
+  data : any;
+  time : number
 }
 
 interface option {
@@ -59,5 +60,6 @@ export interface BLEPlugin extends Plugin {
   notifyCharacteristic(data : NotifyCharacteristic):Promise<void>;
   doOta(data : OtaData):Promise<void>;
   sendAdvertisement(data : SendAdvertisement):Promise<void>;
+  requestServiceDiscover(data : option):Promise<void>;
 }
 

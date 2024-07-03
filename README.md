@@ -32,6 +32,7 @@ npx cap sync
 * [`notifyCharacteristic(...)`](#notifycharacteristic)
 * [`doOta(...)`](#doota)
 * [`sendAdvertisement(...)`](#sendadvertisement)
+* [`requestServiceDiscover(...)`](#requestservicediscover)
 * [Interfaces](#interfaces)
 
 </docgen-index>
@@ -254,6 +255,19 @@ sendAdvertisement(data: SendAdvertisement) => Promise<void>
 --------------------
 
 
+### requestServiceDiscover(...)
+
+```typescript
+requestServiceDiscover(data: option) => Promise<void>
+```
+
+| Param      | Type                                      |
+| ---------- | ----------------------------------------- |
+| **`data`** | <code><a href="#option">option</a></code> |
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -325,8 +339,9 @@ sendAdvertisement(data: SendAdvertisement) => Promise<void>
 
 #### SendAdvertisement
 
-| Prop           | Type             |
-| -------------- | ---------------- |
-| **`advtData`** | <code>any</code> |
+| Prop       | Type                |
+| ---------- | ------------------- |
+| **`data`** | <code>any</code>    |
+| **`time`** | <code>number</code> |
 
 </docgen-api>
