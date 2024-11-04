@@ -322,19 +322,6 @@ public class bleOperations {
             scanFilters = new ArrayList<>();
             scanFilters.add(filter);
         }
-        else{
-            settings = new ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .setMatchMode(MATCH_MODE_AGGRESSIVE)
-                    .setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-                    .build();
-            filter = new ScanFilter.Builder()
-                    .setServiceUuid(SERVICE_UUID)
-                    .build();
-            scanFilters = new ArrayList<>();
-            scanFilters.add(filter);
-
-        }
     }
     void stopScan(int MessageFrom){
         if(bluetoothLeScanner!=null){
